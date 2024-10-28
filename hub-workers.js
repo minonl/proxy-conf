@@ -1,6 +1,6 @@
 const hub_host = 'registry-1.docker.io'
 const auth_url = 'https://auth.docker.io'
-const workers_url = 'https://hub.rat.dev'
+const workers_url = 'https://hub.min.onl'
 
 export default {
   async fetch(request) {
