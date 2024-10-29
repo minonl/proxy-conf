@@ -1,50 +1,50 @@
-const hub_host = 'registry-1.docker.io'
-const auth_url = 'https://auth.docker.io'
-const workers_url = 'https://hub.min.onl'
+const hub_host = "registry-1.docker.io";
+const auth_url = "https://auth.docker.io";
+const workers_url = "https://hub.min.onl";
 
 export default {
   async fetch(request) {
     const url = new URL(request.url);
     const getReqHeader = (key) => request.headers.get(key);
 
-    if (url.pathname === '/') {
+    if (url.pathname === "/") {
       return index();
     }
 
-    if (url.pathname === '/token') {
+    if (url.pathname === "/token") {
       let token_parameter = {
         headers: {
-          'Host': 'auth.docker.io',
-          'User-Agent': getReqHeader("User-Agent"),
-          'Accept': getReqHeader("Accept"),
-          'Accept-Language': getReqHeader("Accept-Language"),
-          'Accept-Encoding': getReqHeader("Accept-Encoding"),
-          'Connection': 'keep-alive',
-          'Cache-Control': 'max-age=0'
+          Host: "auth.docker.io",
+          "User-Agent": getReqHeader("User-Agent"),
+          Accept: getReqHeader("Accept"),
+          "Accept-Language": getReqHeader("Accept-Language"),
+          "Accept-Encoding": getReqHeader("Accept-Encoding"),
+          Connection: "keep-alive",
+          "Cache-Control": "max-age=0",
         },
         cf: {
-          cacheTtlByStatus: { "200-299": 120, "404": 10, "500-599": 3 }
-        }
+          cacheTtlByStatus: { "200-299": 120, 404: 10, "500-599": 3 },
+        },
       };
-      let token_url = auth_url + url.pathname + url.search
-      return fetch(new Request(token_url, request), token_parameter)
+      let token_url = auth_url + url.pathname + url.search;
+      return fetch(new Request(token_url, request), token_parameter);
     }
 
     url.hostname = hub_host;
 
     let parameter = {
       headers: {
-        'Host': hub_host,
-        'User-Agent': getReqHeader("User-Agent"),
-        'Accept': getReqHeader("Accept"),
-        'Accept-Language': getReqHeader("Accept-Language"),
-        'Accept-Encoding': getReqHeader("Accept-Encoding"),
-        'Connection': 'keep-alive',
-        'Cache-Control': 'max-age=0'
+        Host: hub_host,
+        "User-Agent": getReqHeader("User-Agent"),
+        Accept: getReqHeader("Accept"),
+        "Accept-Language": getReqHeader("Accept-Language"),
+        "Accept-Encoding": getReqHeader("Accept-Encoding"),
+        Connection: "keep-alive",
+        "Cache-Control": "max-age=0",
       },
-      redirect: 'follow',
+      redirect: "follow",
       cf: {
-        cacheTtlByStatus: { "200-299": 2592000, "404": 10, "500-599": 3 }
+        cacheTtlByStatus: { "200-299": 2592000, 404: 10, "500-599": 3 },
       },
     };
 
@@ -52,13 +52,16 @@ export default {
       parameter.headers.Authorization = getReqHeader("Authorization");
     }
 
-    let res = await fetch(new Request(url, request), parameter)
-    res = new Response(res.body, res)
+    let res = await fetch(new Request(url, request), parameter);
+    res = new Response(res.body, res);
 
     if (res.headers.has("Www-Authenticate")) {
       let auth = res.headers.get("Www-Authenticate");
-      let re = new RegExp(auth_url, 'g');
-      res.headers.set("Www-Authenticate", res.headers.get("Www-Authenticate").replace(re, workers_url));
+      let re = new RegExp(auth_url, "g");
+      res.headers.set(
+        "Www-Authenticate",
+        res.headers.get("Www-Authenticate").replace(re, workers_url)
+      );
     }
 
     return res;
